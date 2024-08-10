@@ -5,24 +5,29 @@ const ctx = canvas.getContext("2d") // 2d 이외의 나머지 옵션은 3d를 �
 // css에서 설정한 canvas의 크기를 알려줍니다. 
 canvas.width =800;
 canvas.height = 800;
+// canvas의 선 설정
+ctx.lineWidth = 2;
 
-/* 사람 모양 그리기 */
-// 몸통 그리기
-ctx.fillRect(210, 200, 15, 100); // 왼쪽 팔
-ctx.fillRect(350, 200, 15, 100); // 오른쪽 팔
-ctx.fillRect(260, 200, 60, 200); // 몸통
-// 얼굴 그리기
-ctx.arc( // `arc()`함수는 많은 매개 변수가 사용됩니다.
-    290,        // x 좌표
-    150,        // y 좌표
-    40,         // 반지름의 크기
-    0,          // 시작 angle :: 0도
-    2 * Math.PI // 끝 angle   :: 360도
-);
-ctx.fill();
-// 눈 그리기
-ctx.beginPath(); // 스타일 변경을 위해 Path 분리
-ctx.fillStyle = "white"; // 색상 변경 시에는 새로운 path 검토하고 적용 전에 스타일 변경해야 합니다.
-ctx.arc(275, 140, 5, 0, 2 * Math.PI);
-ctx.arc(305, 140, 5, 0, 2 * Math.PI);
-ctx.fill();
+const colors = [
+    "#ff3838",
+    "#ffb8b8",
+    "#c56cf0",
+    "#ff9f1a",
+    "#fff200",
+    "#32ff7e",
+    "#7efff5",
+    "#18dcff",
+    "#7d5fff"
+]
+
+function onClick(event) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    ctx.strokeStyle = color;
+    ctx.lineTo(event.offsetX, event.offsetY);
+    ctx.stroke();
+}
+
+// canvas.addEventListener("click", onClick)
+canvas.addEventListener("mousemove", onClick)
