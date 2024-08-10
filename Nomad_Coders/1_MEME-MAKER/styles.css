@@ -1,0 +1,13 @@
+/* canvas의 크기 및 외곽선 설정 */
+canvas {
+    width: 800px;
+    height: 800px;
+    border:1px solid black;
+}
+
+/* body 내용물이 가운데 정렬하도록 설정 */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
