@@ -1,3 +1,5 @@
+// HTML 측에서 "file" id elemnt 획득
+const fileInput = document.getElementById("file");
 // HTML 측에서 "mode-btn" id element 획득
 const modeBtn = document.getElementById("mode-btn");
 // HTML 측에서 "destroy-btn" id element 획득
@@ -94,7 +96,28 @@ function onEraserClick() {
     modeBtn.innerText = "Fill";
 }
 
+function onFIleChange(event) {
+    // console.dir(event.taget); // 파일 선택 시 event로 전달되는 사항 확인 
+
+    const file = event.target.files[0]; // 사용자가 선택한 파일 객체에 접근합니다.
+    const url = URL.createObjectURL(file); // 파일 객체에서 파일에 접근 가능한 URL을 획득합니다.
+    // console.log(url); // 출력되는 "blob:http://~"를 브라우저에 접근이 가능합니다.
+    const image = new Image(); // HTML의 <image> 태그를 생성하듯 image elemnt를 생성합니다.
+    image.src = url;
+    image.onload = function() { // image element에 이미지가 로드된 경우 호출되는 이벤트를 등록합니다.
+        ctx.drawImage( // 캔버스에 이미지를 그립니다.
+            image, // image 객체를 등록합니다.
+            0, // 시작 x좌표
+            0, // 시작 y좌표
+            CANVAS_WIDTH,  // width 크기
+            CANVAS_HEIGHT, // height 크기
+        ); 
+        fileInput.value = null; // 사진을 사용한 뒤 fileInput의 값을 비웁니다. 이는 새로운 값 입력이 가능하게 수정됩니다.
+    }
+}
+
 canvas.addEventListener("mousemove", onMouseMove);
+// canvas.onmousemove = onMouseMove; // 위와 같이 `addEventListener()`를 사용한 것과 같은 동작을 합니다.
 canvas.addEventListener("mousedown", startPainting);
 canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
@@ -109,3 +132,5 @@ colorOptions.forEach(color => color.addEventListener("click", onColorClick));
 modeBtn.addEventListener("click", onModeClick);
 destroyBtn.addEventListener("click", onDestroyClick);
 eraseBtn.addEventListener("click", onEraserClick);
+
+fileInput.addEventListener("change", onFIleChange);
