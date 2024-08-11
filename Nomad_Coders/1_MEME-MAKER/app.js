@@ -1,3 +1,5 @@
+// HTML 측의 input 태그 중 "line-width" element에 접근
+const lineWidth = document.getElementById("line-width");
 // HTML 측의 canvas 태그 element에 접근
 const canvas = document.querySelector("canvas");
 // 그림을 그리기 위한 context 획득
@@ -6,7 +8,7 @@ const ctx = canvas.getContext("2d") // 2d 이외의 나머지 옵션은 3d를 �
 canvas.width =800;
 canvas.height = 800;
 // canvas의 선 설정
-ctx.lineWidth = 2;
+ctx.lineWidth = lineWidth.value; // "line-width"의 기본 값을 가져와서 할당하게 구성
 
 let isPainting = false;
 function onMouseMove(event) {
@@ -22,10 +24,16 @@ function startPainting(event) {
 }
 function cancelPainting(event) {
     isPainting = false;
+    ctx.beginPath(); // 그리기 종료 시 기존 path와 구분되게 새 path를 설정합니다.
+}
+
+function onLineWidthChange(event) {
+    ctx.lineWidth = event.target.value;
 }
 
 canvas.addEventListener("mousemove", onMouseMove);
 canvas.addEventListener("mousedown", startPainting);
 canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
-// document.addEventListener("mouseup", cancelPainting)
+
+lineWidth.addEventListener("change", onLineWidthChange);
