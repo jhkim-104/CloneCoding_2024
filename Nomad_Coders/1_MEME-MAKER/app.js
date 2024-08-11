@@ -1,3 +1,5 @@
+// HTML 측에서 "text" id elemnt 획득
+const textInput = document.getElementById("text");
 // HTML 측에서 "file" id elemnt 획득
 const fileInput = document.getElementById("file");
 // HTML 측에서 "mode-btn" id element 획득
@@ -28,6 +30,7 @@ canvas.width =CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
 // canvas의 선 설정
 ctx.lineWidth = lineWidth.value; // "line-width"의 기본 값을 가져와서 할당하게 구성
+ctx.lineCap = "round" // 선 그리는 경우 양 옆을 둥글게 변경합니다.
 
 let isPainting = false;
 let isFilling = false;
@@ -51,6 +54,21 @@ function onCanvasClick(event) {
     if(isFilling) {
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
+}
+function onDoubleClick(event) {
+    const text = textInput.value; // textInput의 입력 값입니다.
+    if (text === "") // textInput의 입력 값이 없는 경우 동작을 하지 않습니다.
+        return
+
+    ctx.save(); // context의 현재 상태, 색상, 스타일 등 모든 것을 저장합니다.
+
+    // console.log(event.offsetX, event.offsetY);  
+    ctx.lineWidth = 1; // 텍스트 표시를 위해 굵기를 1로 변경합니다.
+    ctx.font = "68px serif"; // 폰트를 변경합니다. 두 가지 속성(size, font-family)을 지정할 수 있습니다.
+    // ctx.strokeText(text, event.offsetX, event.offsetY); // stroke 방식 텍스트 입력
+    ctx.fillText(text, event.offsetX, event.offsetY); // fill 방식 텍스트 입력
+
+    ctx.restore(); // 저장했던 context의 상태로 복구합니다.
 }
 
 function onLineWidthChange(event) {
@@ -122,6 +140,7 @@ canvas.addEventListener("mousedown", startPainting);
 canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
 canvas.addEventListener("click", onCanvasClick);
+canvas.addEventListener("dblclick", onDoubleClick);
 
 lineWidth.addEventListener("change", onLineWidthChange);
 color.addEventListener("change", onColorChange);
