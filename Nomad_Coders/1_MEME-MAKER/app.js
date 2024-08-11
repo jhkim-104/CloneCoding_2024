@@ -1,3 +1,5 @@
+// HTML 측에서 "mode-btn" id element 획득
+const modeBtn = document.getElementById("mode-btn");
 // HTML 측에서 "color-option" 클래스를 갖는 element를 획득하여 array 배열로 사용
 const colorOptions = Array.from(
     document.getElementsByClassName("color-option") 
@@ -18,6 +20,8 @@ canvas.height = 800;
 ctx.lineWidth = lineWidth.value; // "line-width"의 기본 값을 가져와서 할당하게 구성
 
 let isPainting = false;
+let isFilling = false;
+
 function onMouseMove(event) {
     if(isPainting) {
         ctx.lineTo(event.offsetX, event.offsetY);
@@ -32,6 +36,11 @@ function startPainting(event) {
 function cancelPainting(event) {
     isPainting = false;
     ctx.beginPath(); // 그리기 종료 시 기존 path와 구분되게 새 path를 설정합니다.
+}
+function onCanvasClick(event) {
+    if(isFilling) {
+        ctx.fillRect(0, 0, 800, 800);
+    }
 }
 
 function onLineWidthChange(event) {
@@ -54,13 +63,26 @@ function onColorClick(event) {
     color.value = colorValue; // color input의 색상도 변경
 }
 
+function onModeClick() {
+    if(isFilling) {
+        isFilling = false;
+        modeBtn.innerText = "Fill";
+    } else {
+        isFilling = true;
+        modeBtn.innerText = "Draw";
+    }
+}
+
 canvas.addEventListener("mousemove", onMouseMove);
 canvas.addEventListener("mousedown", startPainting);
 canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
+canvas.addEventListener("click", onCanvasClick);
 
 lineWidth.addEventListener("change", onLineWidthChange);
 color.addEventListener("change", onColorChange);
 
 // 각 color element에 이벤트 리스너 등록
 colorOptions.forEach(color => color.addEventListener("click", onColorClick));
+
+modeBtn.addEventListener("click", onModeClick);
