@@ -96,10 +96,10 @@ function onColorClick(event) {
 function onModeClick() {
     if(isFilling) {
         isFilling = false;
-        modeBtn.innerText = "Fill";
+        modeBtn.innerText = "🩸 Fill";
     } else {
         isFilling = true;
-        modeBtn.innerText = "Draw";
+        modeBtn.innerText = "🖌️ Draw";
     }
 }
 
