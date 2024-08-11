@@ -1,3 +1,5 @@
+// HTML 측의 input 태그 중 "color" element에 접근
+const color = document.getElementById("color");
 // HTML 측의 input 태그 중 "line-width" element에 접근
 const lineWidth = document.getElementById("line-width");
 // HTML 측의 canvas 태그 element에 접근
@@ -30,6 +32,10 @@ function cancelPainting(event) {
 function onLineWidthChange(event) {
     ctx.lineWidth = event.target.value;
 }
+function onColorChange(event) {
+    ctx.strokeStyle = event.target.value; // 선의 색상을 설정
+    ctx.fillStyle = event.target.value; // 채우기 색상을 설정
+}
 
 canvas.addEventListener("mousemove", onMouseMove);
 canvas.addEventListener("mousedown", startPainting);
@@ -37,3 +43,4 @@ canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
 
 lineWidth.addEventListener("change", onLineWidthChange);
+color.addEventListener("change", onColorChange);
