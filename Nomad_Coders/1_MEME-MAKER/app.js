@@ -1,5 +1,9 @@
 // HTML 측에서 "mode-btn" id element 획득
 const modeBtn = document.getElementById("mode-btn");
+// HTML 측에서 "destroy-btn" id element 획득
+const destroyBtn = document.getElementById("destroy-btn");
+// HTML 측에서 "erase-btn" id element 획득
+const eraseBtn = document.getElementById("eraser-btn");
 // HTML 측에서 "color-option" 클래스를 갖는 element를 획득하여 array 배열로 사용
 const colorOptions = Array.from(
     document.getElementsByClassName("color-option") 
@@ -13,9 +17,13 @@ const lineWidth = document.getElementById("line-width");
 const canvas = document.querySelector("canvas");
 // 그림을 그리기 위한 context 획득
 const ctx = canvas.getContext("2d") // 2d 이외의 나머지 옵션은 3d를 위한 것 
+
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 800;
+
 // css에서 설정한 canvas의 크기를 알려줍니다. 
-canvas.width =800;
-canvas.height = 800;
+canvas.width =CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
 // canvas의 선 설정
 ctx.lineWidth = lineWidth.value; // "line-width"의 기본 값을 가져와서 할당하게 구성
 
@@ -39,7 +47,7 @@ function cancelPainting(event) {
 }
 function onCanvasClick(event) {
     if(isFilling) {
-        ctx.fillRect(0, 0, 800, 800);
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
 }
 
@@ -73,6 +81,19 @@ function onModeClick() {
     }
 }
 
+function onDestroyClick() {
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0,  CANVAS_WIDTH, CANVAS_HEIGHT);
+}
+
+function onEraserClick() {
+    // 선의 색상을 하얀색으로 변경합니다.
+    ctx.strokeStyle = "white";
+    // 채우기 모드인 경우일 수 있으니 그리기 모드로 변경 시킵니다.
+    isFilling = false;
+    modeBtn.innerText = "Fill";
+}
+
 canvas.addEventListener("mousemove", onMouseMove);
 canvas.addEventListener("mousedown", startPainting);
 canvas.addEventListener("mouseup", cancelPainting);
@@ -86,3 +107,5 @@ color.addEventListener("change", onColorChange);
 colorOptions.forEach(color => color.addEventListener("click", onColorClick));
 
 modeBtn.addEventListener("click", onModeClick);
+destroyBtn.addEventListener("click", onDestroyClick);
+eraseBtn.addEventListener("click", onEraserClick);
