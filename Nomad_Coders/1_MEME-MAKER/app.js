@@ -1,3 +1,5 @@
+// HTML 측에서 "save" id button element 획득
+const saveBtn = document.getElementById("save");
 // HTML 측에서 "text" id elemnt 획득
 const textInput = document.getElementById("text");
 // HTML 측에서 "file" id elemnt 획득
@@ -134,6 +136,15 @@ function onFIleChange(event) {
     }
 }
 
+function onSaveClick() {
+    const url = canvas.toDataURL(); // canvas의 현재 image 링크를 획득합니다.
+    // url을 이용해 a태그 생성 후 해당 a태그 클릭하는 동작 구현
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "myDrawing.png";
+    a.click();
+}
+
 canvas.addEventListener("mousemove", onMouseMove);
 // canvas.onmousemove = onMouseMove; // 위와 같이 `addEventListener()`를 사용한 것과 같은 동작을 합니다.
 canvas.addEventListener("mousedown", startPainting);
@@ -153,3 +164,5 @@ destroyBtn.addEventListener("click", onDestroyClick);
 eraseBtn.addEventListener("click", onEraserClick);
 
 fileInput.addEventListener("change", onFIleChange);
+
+saveBtn.addEventListener("click", onSaveClick);
