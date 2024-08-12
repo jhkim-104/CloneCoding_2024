@@ -1,11 +1,19 @@
+// HTML 측에서 "font-select" element 획득
+const fontFileInput = document.getElementById("font-file");
+// HTML 측에서 "font-select" element 획득
+const textFontSelect = document.getElementById("font-select");
+// HTML 측에서 "text-mode-btn" element 획득
+const textModeBtn = document.getElementById("text-mode-btn");
+// HTML 측에서 "text-size" element 획득
+const textSize = document.getElementById("text-size");
 // HTML 측에서 "save" id button element 획득
 const saveBtn = document.getElementById("save");
 // HTML 측에서 "text" id elemnt 획득
 const textInput = document.getElementById("text");
 // HTML 측에서 "file" id elemnt 획득
-const fileInput = document.getElementById("file");
-// HTML 측에서 "mode-btn" id element 획득
-const modeBtn = document.getElementById("mode-btn");
+const imageFileInput = document.getElementById("image-file");
+// HTML 측에서 "line-mode-btn" id element 획득
+const lineModeBtn = document.getElementById("line-mode-btn");
 // HTML 측에서 "full-screen-fill-btn" id element 획득
 const fullScreenFillBtn = document.getElementById("full-screen-fill-btn");
 // HTML 측에서 "destroy-btn" id element 획득
@@ -37,7 +45,8 @@ ctx.lineWidth = lineWidth.value; // "line-width"의 기본 값을 가져와서 �
 ctx.lineCap = "round" // 선 그리는 경우 양 옆을 둥글게 변경합니다.
 
 let isPainting = false;
-let isFilling = false;
+let isLineFilling = false;
+let isTextFilling = true;
 
 function onMouseMove(event) {
     if(isPainting) {
@@ -52,7 +61,7 @@ function startPainting(event) {
 }
 function cancelPainting(event) {
     isPainting = false;
-    if (isFilling) {
+    if (isLineFilling) {
         ctx.fill();
     }
     ctx.beginPath(); // 그리기 종료 시 기존 path와 구분되게 새 path를 설정합니다.
@@ -66,9 +75,16 @@ function onDoubleClick(event) {
 
     // console.log(event.offsetX, event.offsetY);  
     ctx.lineWidth = 1; // 텍스트 표시를 위해 굵기를 1로 변경합니다.
-    ctx.font = "68px serif"; // 폰트를 변경합니다. 두 가지 속성(size, font-family)을 지정할 수 있습니다.
-    // ctx.strokeText(text, event.offsetX, event.offsetY); // stroke 방식 텍스트 입력
-    ctx.fillText(text, event.offsetX, event.offsetY); // fill 방식 텍스트 입력
+    
+    ctx.font = `${textSize.value}px ${textFontSelect.value}`; // 폰트를 변경합니다. 두 가지 속성(size, font-family)을 지정할 수 있습니다.
+    // console.log(ctx.font);  
+    
+    if (isTextFilling) {
+        ctx.fillText(text, event.offsetX, event.offsetY); // fill 방식 텍스트 입력
+    }
+    else {
+        ctx.strokeText(text, event.offsetX, event.offsetY); // stroke 방식 텍스트 입력
+    }
 
     ctx.restore(); // 저장했던 context의 상태로 복구합니다.
 }
@@ -93,13 +109,13 @@ function onColorClick(event) {
     color.value = colorValue; // color input의 색상도 변경
 }
 
-function onModeClick() {
-    if(isFilling) {
-        isFilling = false;
-        modeBtn.innerText = "🩸 Fill";
+function onLineModeClick() {
+    if(isLineFilling) {
+        isLineFilling = false;
+        lineModeBtn.innerText = "🩸 Fill";
     } else {
-        isFilling = true;
-        modeBtn.innerText = "🖌️ Draw";
+        isLineFilling = true;
+        lineModeBtn.innerText = "🖌️ Draw";
     }
 }
 
@@ -116,11 +132,11 @@ function onEraserClick() {
     // 선의 색상을 하얀색으로 변경합니다.
     ctx.strokeStyle = "white";
     // 채우기 모드인 경우일 수 있으니 그리기 모드로 변경 시킵니다.
-    isFilling = false;
-    modeBtn.innerText = "Fill";
+    isLineFilling = false;
+    lineModeBtn.innerText = "🩸 Fill";
 }
 
-function onFIleChange(event) {
+function onImageFileChange(event) {
     // console.dir(event.taget); // 파일 선택 시 event로 전달되는 사항 확인 
 
     const file = event.target.files[0]; // 사용자가 선택한 파일 객체에 접근합니다.
@@ -136,7 +152,7 @@ function onFIleChange(event) {
             CANVAS_WIDTH,  // width 크기
             CANVAS_HEIGHT, // height 크기
         ); 
-        fileInput.value = null; // 사진을 사용한 뒤 fileInput의 값을 비웁니다. 이는 새로운 값 입력이 가능하게 수정됩니다.
+        imageFileInput.value = null; // 사진을 사용한 뒤 fileInput의 값을 비웁니다. 이는 새로운 값 입력이 가능하게 수정됩니다.
     }
 }
 
@@ -147,6 +163,41 @@ function onSaveClick() {
     a.href = url;
     a.download = "myDrawing.png";
     a.click();
+}
+
+function onTextModeBtn() {
+    if(isTextFilling) {
+        isTextFilling = false;
+        textModeBtn.innerText = "🩸 Fill";
+    } else {
+        isTextFilling = true;
+        textModeBtn.innerText = "🖌️ Draw";
+    }
+}
+
+function onFontFileChange(event) {
+    const file = event.target.files[0]; // 사용자가 선택한 파일 객체에 접근합니다.
+    const fontName = file.name.split('.').slice(0, -1).join('.');
+    // console.log(fontName);
+
+    const url = URL.createObjectURL(file); // 파일 객체에서 파일에 접근 가능한 URL을 획득합니다.
+    let fontFace = new FontFace(`${fontName}`, `url(${url})`);
+
+    // 폰트를 로드한 후, 사용할 수 있도록 설정
+    fontFace.load().then(function(loadedFont) {
+        document.fonts.add(loadedFont); // 브라우저에 폰트 추가
+
+        let option = document.createElement("option");
+        option.value = fontName;
+        option.text = fontName;
+
+        textFontSelect.appendChild(option);
+        textFontSelect.value = fontName; // 추가된 글꼴 자동 선택
+
+        fontFileInput.value = null; // 폰트 등록 후 제거
+    }).catch(function(error) {
+        console.error('Font loading failed:', error);
+    });
 }
 
 canvas.addEventListener("mousemove", onMouseMove);
@@ -162,11 +213,15 @@ color.addEventListener("change", onColorChange);
 // 각 color element에 이벤트 리스너 등록
 colorOptions.forEach(color => color.addEventListener("click", onColorClick));
 
-modeBtn.addEventListener("click", onModeClick);
+lineModeBtn.addEventListener("click", onLineModeClick);
 fullScreenFillBtn.addEventListener("click", onFullScreenFillClick);
 destroyBtn.addEventListener("click", onDestroyClick);
 eraseBtn.addEventListener("click", onEraserClick);
 
-fileInput.addEventListener("change", onFIleChange);
+imageFileInput.addEventListener("change", onImageFileChange);
 
 saveBtn.addEventListener("click", onSaveClick);
+
+textModeBtn.addEventListener("click", onTextModeBtn);
+
+fontFileInput.addEventListener("change", onFontFileChange);

@@ -60,7 +60,8 @@ button:hover {
     opacity: 0.85;
 }
 
-input#file {
+input#image-file,
+input#font-file {
     display: none;
 }
 
@@ -71,4 +72,14 @@ input#text {
     font-weight: 500;
     text-align: center;
     background-color:white;
+}
+
+select {
+    padding: 10px;
+    border: 2px solid royalblue;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
 }
