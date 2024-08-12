@@ -6,6 +6,8 @@ const textInput = document.getElementById("text");
 const fileInput = document.getElementById("file");
 // HTML 측에서 "mode-btn" id element 획득
 const modeBtn = document.getElementById("mode-btn");
+// HTML 측에서 "full-screen-fill-btn" id element 획득
+const fullScreenFillBtn = document.getElementById("full-screen-fill-btn");
 // HTML 측에서 "destroy-btn" id element 획득
 const destroyBtn = document.getElementById("destroy-btn");
 // HTML 측에서 "erase-btn" id element 획득
@@ -50,12 +52,10 @@ function startPainting(event) {
 }
 function cancelPainting(event) {
     isPainting = false;
-    ctx.beginPath(); // 그리기 종료 시 기존 path와 구분되게 새 path를 설정합니다.
-}
-function onCanvasClick(event) {
-    if(isFilling) {
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    if (isFilling) {
+        ctx.fill();
     }
+    ctx.beginPath(); // 그리기 종료 시 기존 path와 구분되게 새 path를 설정합니다.
 }
 function onDoubleClick(event) {
     const text = textInput.value; // textInput의 입력 값입니다.
@@ -101,6 +101,10 @@ function onModeClick() {
         isFilling = true;
         modeBtn.innerText = "🖌️ Draw";
     }
+}
+
+function onFullScreenFillClick(event) {
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 }
 
 function onDestroyClick() {
@@ -150,7 +154,6 @@ canvas.addEventListener("mousemove", onMouseMove);
 canvas.addEventListener("mousedown", startPainting);
 canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
-canvas.addEventListener("click", onCanvasClick);
 canvas.addEventListener("dblclick", onDoubleClick);
 
 lineWidth.addEventListener("change", onLineWidthChange);
@@ -160,6 +163,7 @@ color.addEventListener("change", onColorChange);
 colorOptions.forEach(color => color.addEventListener("click", onColorClick));
 
 modeBtn.addEventListener("click", onModeClick);
+fullScreenFillBtn.addEventListener("click", onFullScreenFillClick);
 destroyBtn.addEventListener("click", onDestroyClick);
 eraseBtn.addEventListener("click", onEraserClick);
 
