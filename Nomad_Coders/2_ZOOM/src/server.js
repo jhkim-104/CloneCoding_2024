@@ -16,9 +16,13 @@ const handleListen = () => console.log(`Listening on http://localhost:${portNumb
 const server = http.createServer(app);  // http 패키지 사용해 서버 생성 (with express)
 const wss = new WebSocket.Server({ server });   // ws server 생성
 
-function handleConnection(socket) {
-    console.log(socket)
-}
-wss.on("connection", handleConnection )
+wss.on("connection", (socket) => {
+    console.log("Connected to Browser ✅");
+    socket.on("close", () => console.log("Disconnected from Browser ❌"));
+    socket.on("message", (message) => {
+        console.log(message.toString()); 
+    });
+    socket.send("hello!!! ");
+});
 
 server.listen(3000, handleListen);  // server listen
