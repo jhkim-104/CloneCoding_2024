@@ -1,3 +1,5 @@
+import http from "http" // nodejs에 이미 포함되어 있는 패키지라 설치하지 않아도 됩니다.
+import WebSocket from "ws"; // ws 패키지 import
 import express from "express";
 
 const app = express();
@@ -10,4 +12,8 @@ app.get("/*", (req, res) => res.redirect("/")); // "/"만 사용할 것이므로
 
 const portNumber = 3000;
 const handleListen = () => console.log(`Listening on http://localhost:${portNumber}`)
-app.listen(portNumber, handleListen);
+
+const server = http.createServer(app);  // http 패키지 사용해 서버 생성 (with express)
+const wss = new WebSocket.Server({ server });   // ws server 생성
+
+server.listen(3000, handleListen);  // server listen
