@@ -20,10 +20,19 @@ const sockets = [];
 
 wss.on("connection", (socket) => {
     sockets.push(socket); // 연결된 소켓 저장
+    socket["nickname"] = "Anno"; // 초기값 설정
     console.log("Connected to Browser ✅");
     socket.on("close", () => console.log("Disconnected from Browser ❌"));
-    socket.on("message", (message) => {
-        sockets.forEach(aSocket => aSocket.send(message.toString())); // 연결된 소켓들에게 메시지 되돌려 보내기
+    socket.on("message", (msg) => {
+        const message = JSON.parse(msg.toString());
+        switch(message.type) {
+            case "new_message":
+                sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
+                break;
+            case "nickname":
+                socket["nickname"] = message.payload;
+                break;
+        }
     });
 });
 
