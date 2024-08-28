@@ -19,11 +19,11 @@ const wss = new WebSocket.Server({ server });   // ws server 생성
 const sockets = [];
 
 wss.on("connection", (socket) => {
-    sockets.push(socket);
+    sockets.push(socket); // 연결된 소켓 저장
     console.log("Connected to Browser ✅");
     socket.on("close", () => console.log("Disconnected from Browser ❌"));
     socket.on("message", (message) => {
-        sockets.forEach(aSocket => aSocket.send(message.toString()));
+        sockets.forEach(aSocket => aSocket.send(message.toString())); // 연결된 소켓들에게 메시지 되돌려 보내기
     });
 });
 
