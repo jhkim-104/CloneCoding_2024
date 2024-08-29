@@ -1,5 +1,5 @@
 import http from "http" // nodejs에 이미 포함되어 있는 패키지라 설치하지 않아도 됩니다.
-import WebSocket from "ws"; // ws 패키지 import
+import {Server} from "socket.io"; // socket.io 패키지 import
 import express from "express";
 
 const app = express();
@@ -13,27 +13,33 @@ app.get("/*", (_, res) => res.redirect("/")); // "/"만 사용할 것이므로 �
 const portNumber = 3000;
 const handleListen = () => console.log(`Listening on http://localhost:${portNumber}`)
 
-const server = http.createServer(app);  // http 패키지 사용해 서버 생성 (with express)
-const wss = new WebSocket.Server({ server });   // ws server 생성
+const httpServer = http.createServer(app);  // http 패키지 사용해 서버 생성 (with express)
+const wsServer = new Server(httpServer); // socket.io 서버 생성
 
-const sockets = [];
+wsServer.on("connection", (socket) => {
+    console.log(socket);
+})
 
-wss.on("connection", (socket) => {
-    sockets.push(socket); // 연결된 소켓 저장
-    socket["nickname"] = "Anno"; // 초기값 설정
-    console.log("Connected to Browser ✅");
-    socket.on("close", () => console.log("Disconnected from Browser ❌"));
-    socket.on("message", (msg) => {
-        const message = JSON.parse(msg.toString());
-        switch(message.type) {
-            case "new_message":
-                sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
-                break;
-            case "nickname":
-                socket["nickname"] = message.payload;
-                break;
-        }
-    });
-});
+// const wss = new WebSocket.Server({ server });   // ws server 생성
 
-server.listen(3000, handleListen);  // server listen
+// const sockets = [];
+
+// wss.on("connection", (socket) => {
+//     sockets.push(socket); // 연결된 소켓 저장
+//     socket["nickname"] = "Anno"; // 초기값 설정
+//     console.log("Connected to Browser ✅");
+//     socket.on("close", () => console.log("Disconnected from Browser ❌"));
+//     socket.on("message", (msg) => {
+//         const message = JSON.parse(msg.toString());
+//         switch(message.type) {
+//             case "new_message":
+//                 sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
+//                 break;
+//             case "nickname":
+//                 socket["nickname"] = message.payload;
+//                 break;
+//         }
+//     });
+// });
+
+httpServer.listen(3000, handleListen);  // server listen
