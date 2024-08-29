@@ -17,11 +17,12 @@ const httpServer = http.createServer(app);  // http 패키지 사용해 서버 �
 const wsServer = new Server(httpServer); // socket.io 서버 생성
 
 wsServer.on("connection", (socket) => {
+    socket.onAny((event) => { // 미들웨어 추가와 유사
+        console.log(`Socket Event: ${event}`); // 발생 이벤트 들을 로깅합니다.
+    });
     socket.on("enter_room", (roomName, done) => {
-        console.log(roomName);
-        setTimeout(() => {
-            done("hello from the backend");
-        }, 10000);
+        socket.join(roomName);
+        done();
     });
 })
 
