@@ -17,10 +17,10 @@ const httpServer = http.createServer(app);  // http 패키지 사용해 서버 �
 const wsServer = new Server(httpServer); // socket.io 서버 생성
 
 wsServer.on("connection", (socket) => {
-    socket.on("enter_room", (msg, done) => {
-        console.log(msg);
+    socket.on("enter_room", (roomName, done) => {
+        console.log(roomName);
         setTimeout(() => {
-            done();
+            done("hello from the backend");
         }, 10000);
     });
 })
