@@ -63,3 +63,13 @@ socket.on("bye", (leftUser) => {
 });
 
 socket.on("new_message", addMessage);
+
+socket.on("room_change", (rooms) => {
+    const roomList = welcome.querySelector("ul");
+    roomList.innerHTML = ""; // 기존 목록 비우기
+    rooms.forEach(room => { // 새 목록 채우기
+        const li = document.createElement("li");
+        li.innerText = room;
+        roomList.append(li);        
+    });
+});
