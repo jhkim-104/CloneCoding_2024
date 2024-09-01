@@ -14,6 +14,8 @@ html(lang="en")
                 video#myFace(autoplay, playsinline, width="400", height="400") 
                 //- playsinline은 모바일을 위한 속성으로 비디오 재생 시 전체 화면 방지
                 button#mute Mute
-                button#camera Turn Camera Off
+                button#camera 
+                    Turn Camera Off
+                select#cameras
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js") 
