@@ -1,6 +1,7 @@
 import http from "http" // nodejs에 이미 포함되어 있는 패키지라 설치하지 않아도 됩니다.
 import {Server} from "socket.io"; // socket.io 패키지 import
 import express from "express";
+import { count } from "console";
 
 const app = express();
 
@@ -31,6 +32,10 @@ function publicRooms() {
     return publicRooms;
 }
 
+function countRoom(roomName) {
+    return wsServer.sockets.adapter.rooms.get(roomName)?.size; // null 체이닝으로 null인 경우 처리
+}
+
 wsServer.on("connection", (socket) => {
     socket.onAny((event) => { // 미들웨어 추가와 유사
         // console.log(wsServer.sockets.adapter);
@@ -38,13 +43,17 @@ wsServer.on("connection", (socket) => {
     });
     socket.on("enter_room", (roomName, nickname, done) => {
         socket.join(roomName);
-        socket['nickname'] = nickname   
+        socket['nickname'] = nickname
         done();
         socket.to(roomName).emit("welcome", socket.nickname); // 룸 전체에 메시지 전송
+        wsServer.to(roomName).emit("user_count_change", countRoom(roomName)); // 룸에 연결된 사용자 수 갱신
         wsServer.sockets.emit("room_change", publicRooms()); // 연결된 모든 소켓에 이벤트 전송
     });
     socket.on("disconnecting", () => { // socket이 해제되기 직전에 호출
-        socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname));
+        socket.rooms.forEach((room) => {
+            socket.to(room).emit("user_count_change", countRoom(room) - 1); // 룸에 연결된 사용자 수 갱신 (자신 제외)
+            socket.to(room).emit("bye", socket.nickname)
+        });
     });
     socket.on("disconnect", () => { // socket이 해제되고 호출
         wsServer.sockets.emit("room_change", publicRooms());

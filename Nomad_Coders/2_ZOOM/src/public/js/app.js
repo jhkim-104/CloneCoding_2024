@@ -9,6 +9,8 @@ room.hidden = true; // 최초 페이지 로드 시 메시지 숨기기
 let roomName;
 let nickname;
 
+var userCount = 0;
+
 function addMessage(message) {
     const ul = room.querySelector("ul");
     const li = document.createElement("li");
@@ -26,14 +28,22 @@ function handleMessageSubmit(event) {
     input.value = "";
 }
 
+function roomStatusChange() {
+    // 룸 제목 설정
+    const h3 = room.querySelector("h3");
+    h3.innerText = `
+    Room : ${roomName}\n 
+    User Count : ${userCount}\n 
+    Nickname : ${nickname}\n`;
+}
+
 function showRoom() {
     // 룸 입력 숨기고, 메시지 입력 보이기
     welcome.hidden = true;
     room.hidden = false;
 
-    // 룸 제목 설정
-    const h3 = room.querySelector("h3");
-    h3.innerText = `Room : ${roomName}, Nickname : ${nickname}`;
+    roomStatusChange();
+
     // 이벤트 등록
     const form = room.querySelector("form");
     form.addEventListener("submit", handleMessageSubmit);    
@@ -60,6 +70,12 @@ socket.on("welcome", (joinUser) => {
 
 socket.on("bye", (leftUser) => {
     addMessage(`${leftUser} left ㅠㅠ`);
+});
+
+socket.on("user_count_change", (updateUserCount) => {
+    userCount = updateUserCount;
+    
+    roomStatusChange();
 });
 
 socket.on("new_message", addMessage);
