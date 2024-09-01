@@ -20,16 +20,17 @@ wsServer.on("connection", (socket) => {
     socket.onAny((event) => { // 미들웨어 추가와 유사
         console.log(`Socket Event: ${event}`); // 발생 이벤트 들을 로깅합니다.
     });
-    socket.on("enter_room", (roomName, done) => {
+    socket.on("enter_room", (roomName, nickname, done) => {
         socket.join(roomName);
+        socket['nickname'] = nickname   
         done();
-        socket.to(roomName).emit("welcome"); // 룸 전체에 메시지 전송
+        socket.to(roomName).emit("welcome", socket.nickname); // 룸 전체에 메시지 전송
     });
     socket.on("disconnecting", () => { // 클라이언트 측 연결 해제 로그
-        socket.rooms.forEach((room) => socket.to(room).emit("bye"));
+        socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname));
     });
     socket.on("new_message", (msg, room, done) => {
-        socket.to(room).emit("new_message", msg);
+        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
         done(); // 클라이언트 측 콜백 실행
     });
 })

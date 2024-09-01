@@ -7,6 +7,7 @@ const room = document.getElementById("room");
 room.hidden = true; // 최초 페이지 로드 시 메시지 숨기기
 
 let roomName;
+let nickname;
 
 function addMessage(message) {
     const ul = room.querySelector("ul");
@@ -32,28 +33,33 @@ function showRoom() {
 
     // 룸 제목 설정
     const h3 = room.querySelector("h3");
-    h3.innerText = `Room : ${roomName}`;
+    h3.innerText = `Room : ${roomName}, Nickname : ${nickname}`;
     // 이벤트 등록
     const form = room.querySelector("form");
     form.addEventListener("submit", handleMessageSubmit);    
 }
 
-function handleRoomSubmit(event) {
+function handleRoomAndNicknameSubmit(event) {
     event.preventDefault();
-    const input = form.querySelector("input");
-    socket.emit("enter_room", input.value, showRoom);
-    roomName = input.value;
-    input.value = "";
+    const roomNameInput = form.querySelector("input#room_name");
+    const nicknameInput = form.querySelector("input#nickname");
+
+    roomName = roomNameInput.value;
+    nickname = nicknameInput.value;
+    roomNameInput.value = "";
+    nicknameInput.value = "";
+
+    socket.emit("enter_room", roomName, nickname, showRoom);
 }
 
-form.addEventListener("submit", handleRoomSubmit);
+form.addEventListener("submit", handleRoomAndNicknameSubmit);
 
-socket.on("welcome", () => {
-    addMessage("someone joined!");
+socket.on("welcome", (joinUser) => {
+    addMessage(`${joinUser} arrived!`);
 });
 
-socket.on("bye", () => {
-    addMessage("someone left ㅠㅠ");
+socket.on("bye", (leftUser) => {
+    addMessage(`${leftUser} left ㅠㅠ`);
 });
 
 socket.on("new_message", addMessage);
