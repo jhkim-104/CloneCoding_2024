@@ -1,5 +1,5 @@
 import http from "http" // nodejs에 이미 포함되어 있는 패키지라 설치하지 않아도 됩니다.
-import {Server} from "socket.io"; // socket.io 패키지 import
+import { Server as SocketIO } from "socket.io"; // socket.io 패키지 import
 const { instrument } = require("@socket.io/admin-ui");
 import express from "express";
 
@@ -11,89 +11,20 @@ app.use("/public", express.static(__dirname + "/public"))
 app.get("/", (_, res) => res.render("home"));
 app.get("/*", (_, res) => res.redirect("/")); // "/"만 사용할 것이므로 다른 url 모두 home으로 리다이렉트
 
-const portNumber = 3000;
-const handleListen = () => console.log(`Listening on http://localhost:${portNumber}`)
-
 const httpServer = http.createServer(app);  // http 패키지 사용해 서버 생성 (with express)
-const wsServer = new Server(httpServer, {
+const wsServer = new SocketIO(httpServer, {
     cors: {
         origin: ["https://admin.socket.io"], // socket.io의 데모를 사용하기 위해 cors 허용 처리
         credentials: true,
     },
 }); // socket.io 서버 생성
-
 instrument(wsServer, { // admin ui 사용하도록 허용
   auth: false, // 추후 비밀번호 사용 가능합니다.
   mode: "development",
 });
 
-function publicRooms() {
-    const {
-        sockets: {
-            adapter: { sids, rooms },
-        },
-    } = wsServer;
-    const publicRooms = [];
-    rooms.forEach((_, key) => {
-        if (sids.get(key) === undefined) {
-            publicRooms.push(key);
-        }
-    });
-    return publicRooms;
-}
 
-function countRoom(roomName) {
-    return wsServer.sockets.adapter.rooms.get(roomName)?.size; // null 체이닝으로 null인 경우 처리
-}
 
-wsServer.on("connection", (socket) => {
-    socket.onAny((event) => { // 미들웨어 추가와 유사
-        // console.log(wsServer.sockets.adapter);
-        console.log(`Socket Event: ${event}`); // 발생 이벤트 들을 로깅합니다.
-    });
-    socket.on("enter_room", (roomName, nickname, done) => {
-        socket.join(roomName);
-        socket['nickname'] = nickname
-        done();
-        socket.to(roomName).emit("welcome", socket.nickname); // 룸 전체에 메시지 전송
-        wsServer.to(roomName).emit("user_count_change", countRoom(roomName)); // 룸에 연결된 사용자 수 갱신
-        wsServer.sockets.emit("room_change", publicRooms()); // 연결된 모든 소켓에 이벤트 전송
-    });
-    socket.on("disconnecting", () => { // socket이 해제되기 직전에 호출
-        socket.rooms.forEach((room) => {
-            socket.to(room).emit("user_count_change", countRoom(room) - 1); // 룸에 연결된 사용자 수 갱신 (자신 제외)
-            socket.to(room).emit("bye", socket.nickname)
-        });
-    });
-    socket.on("disconnect", () => { // socket이 해제되고 호출
-        wsServer.sockets.emit("room_change", publicRooms());
-    });
-    socket.on("new_message", (msg, room, done) => {
-        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
-        done(); // 클라이언트 측 콜백 실행
-    });
-})
-
-// const wss = new WebSocket.Server({ server });   // ws server 생성
-
-// const sockets = [];
-
-// wss.on("connection", (socket) => {
-//     sockets.push(socket); // 연결된 소켓 저장
-//     socket["nickname"] = "Anno"; // 초기값 설정
-//     console.log("Connected to Browser ✅");
-//     socket.on("close", () => console.log("Disconnected from Browser ❌"));
-//     socket.on("message", (msg) => {
-//         const message = JSON.parse(msg.toString());
-//         switch(message.type) {
-//             case "new_message":
-//                 sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
-//                 break;
-//             case "nickname":
-//                 socket["nickname"] = message.payload;
-//                 break;
-//         }
-//     });
-// });
-
+const portNumber = 3000;
+const handleListen = () => console.log(`Listening on http://localhost:${portNumber}`)
 httpServer.listen(3000, handleListen);  // server listen
