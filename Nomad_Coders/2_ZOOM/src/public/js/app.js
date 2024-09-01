@@ -8,10 +8,18 @@ room.hidden = true; // 최초 페이지 로드 시 메시지 숨기기
 
 let roomName;
 
+function addMessage(message) {
+    const ul = room.querySelector("ul");
+    const li = document.createElement("li");
+    li.innerText = message;
+    ul.appendChild(li);
+
+}
+
 function showRoom() {
     // 룸 입력 숨기고, 메시지 입력 보이기
     welcome.hidden = true;
-    roomh.hidden = false;
+    room.hidden = false;
 
     // 룸 제목 설정
     const h3 = room.querySelector("h3");
@@ -27,3 +35,7 @@ function handleRoomSubmit(event) {
 }
 
 form.addEventListener("submit", handleRoomSubmit);
+
+socket.on("welcome", () => {
+    addMessage("someone joined!");
+});
