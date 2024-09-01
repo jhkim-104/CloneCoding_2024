@@ -16,8 +16,24 @@ const handleListen = () => console.log(`Listening on http://localhost:${portNumb
 const httpServer = http.createServer(app);  // http 패키지 사용해 서버 생성 (with express)
 const wsServer = new Server(httpServer); // socket.io 서버 생성
 
+function publicRooms() {
+    const {
+        sockets: {
+            adapter: { sids, rooms },
+        },
+    } = wsServer;
+    const publicRooms = [];
+    rooms.forEach((_, key) => {
+        if (sids.get(key) === undefined) {
+            publicRooms.push(key);
+        }
+    });
+    return publicRooms;
+}
+
 wsServer.on("connection", (socket) => {
     socket.onAny((event) => { // 미들웨어 추가와 유사
+        console.log(wsServer.sockets.adapter);
         console.log(`Socket Event: ${event}`); // 발생 이벤트 들을 로깅합니다.
     });
     socket.on("enter_room", (roomName, nickname, done) => {
