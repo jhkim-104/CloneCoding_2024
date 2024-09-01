@@ -25,6 +25,13 @@ wsServer.on("connection", (socket) => {
         done();
         socket.to(roomName).emit("welcome"); // 룸 전체에 메시지 전송
     });
+    socket.on("disconnecting", () => { // 클라이언트 측 연결 해제 로그
+        socket.rooms.forEach((room) => socket.to(room).emit("bye"));
+    });
+    socket.on("new_message", (msg, room, done) => {
+        socket.to(room).emit("new_message", msg);
+        done(); // 클라이언트 측 콜백 실행
+    });
 })
 
 // const wss = new WebSocket.Server({ server });   // ws server 생성
