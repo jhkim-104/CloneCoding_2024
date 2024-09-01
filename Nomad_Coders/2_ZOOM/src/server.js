@@ -19,11 +19,17 @@ const wsServer = new SocketIO(httpServer, {
     },
 }); // socket.io 서버 생성
 instrument(wsServer, { // admin ui 사용하도록 허용
-  auth: false, // 추후 비밀번호 사용 가능합니다.
-  mode: "development",
+    auth: false, // 추후 비밀번호 사용 가능합니다.
+    mode: "development",
 });
 
-
+wsServer.on("connection", (socket) => {
+    socket.on("join_room", (roomName, done) => {
+        socket.join(roomName);
+        done();
+        socket.to(roomName).emit("welcome");
+    });
+});
 
 const portNumber = 3000;
 const handleListen = () => console.log(`Listening on http://localhost:${portNumber}`)
