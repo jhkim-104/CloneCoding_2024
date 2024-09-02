@@ -61,6 +61,14 @@ async function getMedia(deviceId) {
     }
 }
 
+function resetMedia() {
+    if (myStream) {
+        myStream.getTracks().forEach(track => track.stop());
+        myStream = null;
+        console.log("Media stream closed.");
+    }
+}
+
 function handleMuteClick() {
     myStream
         .getAudioTracks()
@@ -129,6 +137,21 @@ async function initCall() {
     makeConnection();
 }
 
+async function resetChat() {
+    chat.hidden = true;
+    const ul = chat.querySelector("ul");
+    ul.innerHTML = "";
+    const form = chat.querySelector("form");
+    form.removeEventListener("submit", handleMessageSubmit)
+}
+
+async function resetCall() {
+    call.hidden = true;
+    welcome.hidden = false;
+    resetMedia();
+    closeConnection();
+}
+
 async function handleWelcomeSubmit(event) {
     event.preventDefault();
     const roomNameInput = welcomeForm.querySelector("#roomName");
@@ -150,6 +173,7 @@ socket.on("welcome", async () => {
     myDataChannel = myPeerConnection.createDataChannel("chat"); // data chnnel 생성
     setDataChannelEvent(myDataChannel);
     console.log("made data channel");
+    setPeerConnectrionStateChange(myPeerConnection);
 
     const offer = await myPeerConnection.createOffer();
     myPeerConnection.setLocalDescription(offer);
@@ -219,6 +243,18 @@ function handleAddStream(data) {
     peerFace.srcObject = data.stream;
 }
 
+function closeConnection() {
+    if (myDataChannel) {
+        myDataChannel.close();
+        myDataChannel = null;
+    }
+
+    if (myPeerConnection) {
+        myPeerConnection.close();
+        myPeerConnection = null;
+    }
+}
+
 function addMessage(message) {
     const ul = chat.querySelector("ul");
     const li = document.createElement("li");
@@ -230,4 +266,34 @@ function setDataChannelEvent(datachannel) {
     myDataChannel.addEventListener("message", (event) => {
         addMessage(event.data);
     });   
+}
+
+function handlePeerDisconnected() {
+    resetCall();
+    resetChat();
+    // console.log("Peer disconnected");
+    // alert("상대방이 연결을 종료했습니다.");
+    // 추가적인 처리 (예: UI 변경, 연결 종료 등)
+}
+
+function handlePeerClosed() {
+    console.log("Connection closed");
+    // 추가적인 처리 (예: UI 리셋, 재연결 시도 등)
+}
+
+function setPeerConnectrionStateChange(peerConnection) {
+    peerConnection.addEventListener("connectionstatechange", () => {
+        switch(myPeerConnection.connectionState) {
+            case "disconnected":
+            case "failed":
+                // 상대방이 연결을 끊었을 때 처리할 작업
+                handlePeerDisconnected();
+                break;
+            case "closed":
+                // 연결이 완전히 종료된 경우
+                handlePeerClosed();
+                break;
+        }
+    });
+    
 }
