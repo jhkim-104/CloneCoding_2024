@@ -1,0 +1,26 @@
+#call > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#call > #streams {
+    justify-content: space-evenly;
+}
+
+
+#call > div > label {
+    margin-right: 20px;
+}
+
+#buttons button {
+    margin-right: 10px;
+}
+
+#buttons button:last-child {
+    margin-right: 0;
+}
+
+#cameras {
+    margin: unset;
+}

@@ -37,11 +37,11 @@ async function getCamera() {
 
 async function getMedia(deviceId) {
     const initialConstrains = {
-        audio: true,
+        // audio: true,
         video: { facingMode: "user" },
     };
     const cameraConstraints = {
-        audio: true,
+        // audio: true,
         video: { deviceId: { exact: deviceId } }, // 특정 카메라 표시하게 강제, 없어도 대체 되지 않습니다.
     };
 
