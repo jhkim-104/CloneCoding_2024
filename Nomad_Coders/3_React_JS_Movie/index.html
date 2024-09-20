@@ -49,36 +49,36 @@
       );
     };
     const KmToMiles = () => {
-      const [amount, setAmount] = React.useState(0);
+      const [amount, setAmount] = React.useState((0).toFixed(6));
       const [inverted, setInverted] = React.useState(false);
       const onChange = (event) => {
         setAmount(event.target.value);
       };
       const reset = () => setAmount(0);
       const onInverted = () => {
-        if (!inverted) setAmount((current) => Math.round(current / 60));
-        else setAmount((current) => current * 60);
+        if (!inverted) setAmount((current) => (current / 1.609344).toFixed(8));
+        else setAmount((current) => (current * 1.609344).toFixed(6));
         setInverted((current) => !current);
       };
       return (
         <div>
           <div>
-            <label htmlFor="minutes">Km</label>
+            <label htmlFor="km">Km</label>
             <input 
-              value={inverted ? amount * 60 : amount} 
-              id="minutes" 
-              placeholder="Minutes" 
+              value={inverted ? (amount * 1.609344).toFixed(6) : amount} 
+              id="km" 
+              placeholder="Km" 
               type="number" 
               onChange={onChange}
               disabled={inverted}
             />
           </div>
           <div>
-            <label htmlFor="hours">Miles</label>
+            <label htmlFor="miles">Miles</label>
             <input 
-              value={inverted ? amount : Math.round(amount / 60)} 
-              id="hours" 
-              placeholder="Hours" 
+              value={inverted ? amount : (amount / 1.609344).toFixed(8)} 
+              id="miles" 
+              placeholder="Miles" 
               type="number" 
               onChange={onChange}
               disabled={!inverted}
