@@ -7,9 +7,11 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel">
-    function Btn({ text }) {
+    function Btn({ text, changeValue }) {
+      console.log(text, "was rendered");
       return (
         <button
+          onClick={changeValue}
           style={{
             backgroundColor: "tomato",
             color: "white",
@@ -22,11 +24,14 @@
         </button>
       );
     }
+    const MemorizedBtns = React.memo(Btn);
     function App() {
+      const [value, setValue] = React.useState("Save Changes");
+      const changeValue = () => setValue("Revert Changes");
       return (
         <div>
-          <Btn text="Save Chagnes" />
-          <Btn text="Continue" />
+          <MemorizedBtns text={value} changeValue={changeValue} />
+          <MemorizedBtns text="Continue" />
         </div>
       );
     }
