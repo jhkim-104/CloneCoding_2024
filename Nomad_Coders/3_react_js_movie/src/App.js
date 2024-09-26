@@ -2,46 +2,40 @@ import { useEffect, useState } from "react";
 
 function App() {
 	const [loading, setLoading] = useState(true);
-	const [coins, setCoins] = useState([]);
-	const [selectedIndex, setSelectedIndex] = useState(0);
-	const [money, setMoney] = useState(0);
-	const onChangeCoin = (event) => setSelectedIndex(event.target.value);
-	const onChaneMoney = (event) => setMoney(event.target.value);
-	// const convertMoney = (money) => {};
+	const [movies, setMovies] = useState([]);
+	const getMovies = async () => {
+		// const response = await fetch(
+		// 	`https://nomad-movies.nomadcoders.workers.dev/movies`
+		// );
+		// const json = await response.json();
+		const json = await (
+			await fetch(`https://nomad-movies.nomadcoders.workers.dev/movies`)
+		).json();
+		setMovies(json);
+		setLoading(false);
+	};
 	useEffect(() => {
-		fetch("https://api.coinpaprika.com/v1/tickers")
-			.then((response) => response.json())
-			.then((json) => {
-				setCoins(json); // 상태에 데이터 할당
-				setLoading(false); // 기존 로딩 완료 시 false로 전환
-			});
-	}, []); // 1회만 사용되도록 의존하는 상태를 비웁니다.
-	console.log(coins[selectedIndex]);
+		getMovies();
+	}, []);
+	console.log(movies);
 	return (
 		<div>
-			<h1>The Coins! {loading ? "" : `(${coins.length})`}</h1>
 			{loading ? (
-				<strong>Loading...</strong>
+				<h1>Loading...</h1>
 			) : (
 				<div>
-					<div>
-						<select onChange={onChangeCoin}>
-							{coins.map((coin, index) => (
-								// index 대신 coin 데이터 내부의 id를 사용
-								<option key={coin.id} value={index}>
-									{coin.name} ({coin.symbol})
-								</option>
-							))}
-						</select>
-					</div>
-					<hr />
-					<div>
-						<input onChange={onChaneMoney} value={money} /> USD
-					</div>
-					<div>
-						{money / coins[selectedIndex].quotes.USD.price}{" "}
-						{coins[selectedIndex].symbol}
-					</div>
+					{movies.map((movie) => (
+						<div key={movie.id}>
+							<img src={movie.poster_path} />
+							<h2>{movie.title}</h2>
+							<p>{movie.overview}</p>
+							<ul>
+								{movie.genre_ids.map((g) => (
+									<li key={g}>{g}</li>
+								))}
+							</ul>
+						</div>
+					))}
 				</div>
 			)}
 		</div>
