@@ -1,10 +1,13 @@
 {
   "files": {
-    "main.js": "/CloneCoding_2024/static/js/main.4807e258.js",
+    "main.css": "/CloneCoding_2024/static/css/main.96c4905a.css",
+    "main.js": "/CloneCoding_2024/static/js/main.20d114ea.js",
     "index.html": "/CloneCoding_2024/index.html",
-    "main.4807e258.js.map": "/CloneCoding_2024/static/js/main.4807e258.js.map"
+    "main.96c4905a.css.map": "/CloneCoding_2024/static/css/main.96c4905a.css.map",
+    "main.20d114ea.js.map": "/CloneCoding_2024/static/js/main.20d114ea.js.map"
   },
   "entrypoints": [
-    "static/js/main.4807e258.js"
+    "static/css/main.96c4905a.css",
+    "static/js/main.20d114ea.js"
   ]
 }
