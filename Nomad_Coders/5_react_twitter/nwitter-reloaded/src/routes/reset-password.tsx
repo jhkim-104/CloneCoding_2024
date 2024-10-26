@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { auth } from "../firebase";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FirebaseError } from "firebase/app";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth";
 import {
   Form,
   Error,
@@ -10,47 +10,44 @@ import {
   Title,
   Input,
   Switcher,
+  Notice,
 } from "../components/auth-components";
-import GithubButton from "../components/github-btn";
 
 export default function login() {
-  const navigate = useNavigate();
   const [isLoading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSended, setIsSended] = useState(false);
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {
       target: { name, value },
     } = e;
     if (name === "email") {
       setEmail(value);
-    } else if (name === "password") {
-      setPassword(value);
     }
   };
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSended(false);
     setError("");
-    if (isLoading || email === "" || password === "") return;
+    if (isLoading || email === "") return;
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/");
+      await sendPasswordResetEmail(auth, email);
     } catch (e) {
+      console.log(e);
       if (e instanceof FirebaseError) {
         setError(e.message);
       }
     } finally {
       setLoading(false);
+      setIsSended(true);
     }
-    // log in account
-    // redirect to the home page
   };
 
   return (
     <Wrapper>
-      <Title>Log into 𝕏</Title>
+      <Title>Reset Password 𝕏</Title>
       <Form onSubmit={onSubmit}>
         <Input
           onChange={onChange}
@@ -61,25 +58,22 @@ export default function login() {
           required
         />
         <Input
-          onChange={onChange}
-          name="password"
-          value={password}
-          placeholder="Password"
-          type="password"
-          required
+          type="submit"
+          value={isLoading ? "Loading..." : "Send Reset Email"}
         />
-        <Input type="submit" value={isLoading ? "Loading..." : "Log In"} />
       </Form>
+      {isSended ? (
+        <Notice>
+          An email has been sent.
+          <br />
+          Please check your inbox.
+        </Notice>
+      ) : null}
       {error !== "" ? <Error>{error}</Error> : null}
       <Switcher>
-        Don't have an account ?{" "}
-        <Link to="/create-account">Create one &rarr;</Link>
+        Have you completed resetting your password?{" "}
+        <Link to="/login">Login &rarr;</Link>
       </Switcher>
-      <Switcher>
-        Forgot your password?{" "}
-        <Link to="/reset-password">Reset Password &rarr;</Link>
-      </Switcher>
-      <GithubButton />
     </Wrapper>
   );
 }
