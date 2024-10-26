@@ -10,8 +10,8 @@ import {
   Title,
   Input,
   Switcher,
-  Notice,
 } from "../components/auth-components";
+import { Notice } from "../components/common-styled-components";
 
 export default function login() {
   const [isLoading, setLoading] = useState(false);

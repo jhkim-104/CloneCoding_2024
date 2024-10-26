@@ -1,7 +1,11 @@
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import styled from "styled-components";
-import { auth, db } from "../firebase";
+import { auth, db, storage } from "../firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { Notice } from "./common-styled-components";
+
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 
 const Form = styled.form`
   display: flex;
@@ -65,13 +69,20 @@ export default function PostTweetForm() {
   const [isLoading, setLoading] = useState(false);
   const [tweet, setTweet] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [fileUploadError, setFileUploadError] = useState("");
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTweet(e.target.value);
   };
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileUploadError("");
     const { files } = e.target;
-    if (files && files.length === 1) {
-      // 여러 파일 업로드 방지
+    if (files === null) {
+      setFileUploadError("Please Selecte valid file!!");
+    } else if (files?.length !== 1) {
+      setFileUploadError("Please Selecte only one file!!");
+    } else if (files[0].size > MAX_FILE_SIZE) {
+      setFileUploadError("Please select a file less than 1MB!!");
+    } else {
       setFile(files[0]);
     }
   };
@@ -81,12 +92,26 @@ export default function PostTweetForm() {
     if (!user || isLoading || tweet === "" || tweet.length > 180) return; // 업로드하면 안되는 상황 예외처리
     try {
       setLoading(true);
-      await addDoc(collection(db, "tweets"), {
+      const doc = await addDoc(collection(db, "tweets"), {
         tweet,
         createdAt: Date.now(),
         username: user.displayName || "Annoymous",
         userId: user.uid,
       });
+      if (file) {
+        const locationRef = ref(
+          storage,
+          `tweets/${user.uid}-${user.displayName}/${doc.id}`
+        );
+        const result = await uploadBytes(locationRef, file);
+        const url = await getDownloadURL(result.ref);
+        await updateDoc(doc, {
+          photo: url,
+        });
+      }
+      // 정상 업데이트 이후 입력 결과 초기화
+      setTweet("");
+      setFile(null);
     } catch (e) {
       console.log(e);
     } finally {
@@ -96,12 +121,14 @@ export default function PostTweetForm() {
   return (
     <Form onSubmit={onSubmit}>
       <TextArea
+        required // 파일 첨부와 달리 트윗은 필수
         rows={5}
         maxLength={180}
         onChange={onChange}
         value={tweet}
         placeholder="What is happening?!"
       />
+      {fileUploadError === "" ? null : <Notice>{fileUploadError}</Notice>}
       <AttachFileButton htmlFor="file">
         {file ? "Poto added ✅" : "Add photo"}
       </AttachFileButton>
