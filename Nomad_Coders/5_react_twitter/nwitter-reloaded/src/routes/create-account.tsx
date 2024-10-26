@@ -1,48 +1,21 @@
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
-import styled from "styled-components";
 import { auth } from "../firebase";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
+import {
+  Form,
+  Error,
+  Wrapper,
+  Title,
+  Input,
+  Switcher,
+} from "../components/auth-components";
 
-const Wrapper = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 420px;
-  padding: 50px 0px;
-`;
-
-const Title = styled.h1`
-  font-size: 42px;
-`;
-
-const Form = styled.form`
-  margin-top: 50px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-`;
-
-const Input = styled.input`
-  padding: 10px 20px;
-  border-radius: 50px;
-  border: none;
-  width: 100%;
-  font-size: 16px;
-  &[type="submit"] {
-    cursor: pointer;
-    &:hover {
-      opacity: 0.8;
-    }
-  }
-`;
-
-const Error = styled.span`
-  font-weight: 600;
-  color: tomato;
-`;
+// const errors = {
+//   // 추후 에러 코드에 따라 친숙한 메시지로 변경
+//   "auth/email-already-in-use": "That email already exists",
+// };
 
 export default function CreateAccount() {
   const navigate = useNavigate();
@@ -65,6 +38,7 @@ export default function CreateAccount() {
   };
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
     if (isLoading || name === "" || email === "" || password === "") return;
     try {
       setLoading(true);
@@ -82,19 +56,20 @@ export default function CreateAccount() {
       // 홈 화면으로 옮기기 (uiseNavigate hook 사용)
       navigate("/");
     } catch (e) {
-      // setError
+      if (e instanceof FirebaseError) {
+        setError(e.message);
+      }
     } finally {
       setLoading(false);
     }
     // create an account
     // set the name of the user.
     // redirect to the home page
-    console.log(name, email, password);
   };
 
   return (
     <Wrapper>
-      <Title>Join 🗙</Title>
+      <Title>Join 𝕏</Title>
       <Form onSubmit={onSubmit}>
         <Input
           onChange={onChange}
@@ -126,6 +101,9 @@ export default function CreateAccount() {
         />
       </Form>
       {error !== "" ? <Error>{error}</Error> : null}
+      <Switcher>
+        Already have an account ? <Link to="/login">Log in &rarr;</Link>
+      </Switcher>
     </Wrapper>
   );
 }
