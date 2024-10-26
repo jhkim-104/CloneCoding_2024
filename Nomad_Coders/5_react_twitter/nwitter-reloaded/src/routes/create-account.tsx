@@ -11,6 +11,7 @@ import {
   Input,
   Switcher,
 } from "../components/auth-components";
+import GithubButton from "../components/github-btn";
 
 // const errors = {
 //   // 추후 에러 코드에 따라 친숙한 메시지로 변경
@@ -104,6 +105,7 @@ export default function CreateAccount() {
       <Switcher>
         Already have an account ? <Link to="/login">Log in &rarr;</Link>
       </Switcher>
+      <GithubButton />
     </Wrapper>
   );
 }
