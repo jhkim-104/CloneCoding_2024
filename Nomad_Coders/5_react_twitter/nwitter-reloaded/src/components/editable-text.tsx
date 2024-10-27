@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent } from "react";
 import { styled } from "styled-components";
 
 interface EditableTextProps {
@@ -6,7 +6,7 @@ interface EditableTextProps {
   isEditMode: boolean;
   currentText: string;
   onTextChange: (newText: string) => void;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 const Payload = styled.p<{ fontSize: string }>`
