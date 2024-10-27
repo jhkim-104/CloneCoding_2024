@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { ITweet } from "./timeline";
 import { auth, db, storage } from "../firebase";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { deleteDoc, deleteField, doc, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import { useState } from "react";
 
@@ -12,6 +12,19 @@ const Wrapper = styled.div`
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 15px;
+`;
+
+const ImageBtnWrapper = styled.div`
+  margin: 5px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  & > * {
+    width: 100%;
+    border-radius: 5px;
+  }
 `;
 
 const Column = styled.div``;
@@ -75,6 +88,19 @@ const IconButton = styled.div`
   }
 `;
 
+const TextButton = styled.button`
+  background-color: gray;
+  color: white;
+  font-weight: 600;
+  border: 0;
+  font-size: 12px;
+  padding: 5px 10px;
+  text-transform: upperccase;
+  &.delete {
+    background-color: tomato;
+  }
+`;
+
 export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
   const [isLoading, setLoading] = useState(false);
   const [currentTweet, setCurrentTweet] = useState(tweet);
@@ -125,6 +151,23 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
   const onEditedTweetChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCurrentTweet(e.target.value);
   };
+  const onImageDelete = async () => {
+    const ok = confirm("Are you sure you want to delete tweet image?");
+    if (!ok || user?.uid !== userId || !photo || isLoading) return; // 재확인
+    try {
+      setLoading(true);
+      const photoRef = ref(storage, `tweets/${user.uid}/${id}`);
+      await deleteObject(photoRef);
+      await updateDoc(curDoc, {
+        photo: deleteField(),
+      });
+      photo = undefined;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Wrapper>
@@ -141,7 +184,16 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
           <Payload>{currentTweet}</Payload>
         )}
       </Column>
-      <Column>{photo ? <Photo src={photo} /> : null}</Column>
+      <Column>
+        {photo ? <Photo src={photo} /> : null}
+        {user?.uid === userId && photo ? (
+          <ImageBtnWrapper>
+            <TextButton onClick={onImageDelete} className="delete">
+              Delete Image
+            </TextButton>
+          </ImageBtnWrapper>
+        ) : null}
+      </Column>
       <RightAlignedColumn>
         {user?.uid === userId ? (
           <>
