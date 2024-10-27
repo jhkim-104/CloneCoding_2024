@@ -11,3 +11,22 @@ export const Notice = styled.span`
   margin: 5px auto;
   max-width: 90%;
 `;
+
+export const IconButton = styled.div`
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 5px 0;
+  height: 30px;
+  width: 30px;
+  svg {
+    width: 30px;
+    fill: lightgray;
+  }
+  &.tweet-delete {
+    svg {
+      fill: tomato;
+    }
+  }
+`;
