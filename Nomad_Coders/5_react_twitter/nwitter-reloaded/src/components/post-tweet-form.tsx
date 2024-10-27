@@ -1,5 +1,5 @@
 import { addDoc, collection, updateDoc } from "firebase/firestore";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import styled from "styled-components";
 import { auth, db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -47,7 +47,7 @@ const AttachFileButton = styled.label`
   cursor: pointer;
 `;
 
-const AttacchFileInput = styled.input`
+const AttachFileInput = styled.input`
   display: none;
 `;
 
@@ -68,6 +68,7 @@ const SubmitBtn = styled.input`
 export default function PostTweetForm() {
   const [isLoading, setLoading] = useState(false);
   const [tweet, setTweet] = useState("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [fileUploadError, setFileUploadError] = useState("");
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -115,6 +116,10 @@ export default function PostTweetForm() {
       setLoading(false);
     }
   };
+  const onFileButtonClick = () => {
+    fileInputRef?.current?.click();
+  };
+
   return (
     <Form onSubmit={onSubmit}>
       <TextArea
@@ -126,13 +131,13 @@ export default function PostTweetForm() {
         placeholder="What is happening?!"
       />
       {fileUploadError === "" ? null : <Notice>{fileUploadError}</Notice>}
-      <AttachFileButton htmlFor="file">
+      <AttachFileButton onClick={onFileButtonClick}>
         {file ? "Poto added ✅" : "Add photo"}
       </AttachFileButton>
-      <AttacchFileInput
+      <AttachFileInput
+        ref={fileInputRef}
         onChange={onFileChange}
         type="file"
-        id="file"
         accept="image/*"
       />
       <SubmitBtn

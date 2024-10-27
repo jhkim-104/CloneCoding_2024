@@ -2,12 +2,19 @@ import styled from "styled-components";
 import { ITweet } from "./timeline";
 import { auth, db, storage } from "../firebase";
 import { deleteDoc, deleteField, doc, updateDoc } from "firebase/firestore";
-import { deleteObject, ref } from "firebase/storage";
-import { useState } from "react";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import { useRef, useState } from "react";
+
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
 
 const Wrapper = styled.div`
   display: grid;
-  grid-template-columns: 6fr 1fr 1fr;
+  grid-template-columns: 7fr 2fr 1fr;
   gap: 20px;
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.5);
@@ -15,6 +22,7 @@ const Wrapper = styled.div`
 `;
 
 const ImageBtnWrapper = styled.div`
+  width: 100%;
   margin: 5px 0;
   display: flex;
   flex-direction: column;
@@ -27,7 +35,9 @@ const ImageBtnWrapper = styled.div`
   }
 `;
 
-const Column = styled.div``;
+const Column = styled.div`
+  height: 100%;
+`;
 const RightAlignedColumn = styled.div`
   justify-self: end;
 `;
@@ -101,10 +111,16 @@ const TextButton = styled.button`
   }
 `;
 
+const AttachFileInput = styled.input`
+  display: none;
+`;
+
 export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
   const [isLoading, setLoading] = useState(false);
   const [currentTweet, setCurrentTweet] = useState(tweet);
+  const [currentPhoto, setCurrentPhoto] = useState(photo);
   const [isEditMode, setIsEditMode] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const user = auth.currentUser;
   const curDoc = doc(db, "tweets", id);
   const onEditMode = () => {
@@ -138,7 +154,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     if (!ok || user?.uid !== userId) return; // 재확인
     try {
       await deleteDoc(curDoc); // 삭제 요청
-      if (photo) {
+      if (currentPhoto) {
         const photoRef = ref(storage, `tweets/${user.uid}/${id}`);
         await deleteObject(photoRef);
       }
@@ -153,7 +169,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
   };
   const onImageDelete = async () => {
     const ok = confirm("Are you sure you want to delete tweet image?");
-    if (!ok || user?.uid !== userId || !photo || isLoading) return; // 재확인
+    if (!ok || user?.uid !== userId || !currentPhoto || isLoading) return; // 재확인
     try {
       setLoading(true);
       const photoRef = ref(storage, `tweets/${user.uid}/${id}`);
@@ -161,12 +177,49 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
       await updateDoc(curDoc, {
         photo: deleteField(),
       });
-      photo = undefined;
+      setCurrentPhoto(undefined);
     } catch (e) {
       console.log(e);
     } finally {
       setLoading(false);
     }
+  };
+  const onUploadImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { files } = e.target;
+    if (files === null) {
+      alert("Please Selecte valid file!!");
+      return;
+    } else if (files?.length !== 1) {
+      alert("Please Selecte only one file!!");
+      return;
+    } else if (files[0].size > MAX_FILE_SIZE) {
+      alert("Please select a file less than 1MB!!");
+      return;
+    }
+
+    const file = files[0];
+    if (user?.uid !== userId || !file || isLoading) {
+      alert("Upload Failed");
+      return; // 재확인
+    }
+
+    try {
+      setLoading(true);
+      const photoRef = ref(storage, `tweets/${user.uid}/${id}`);
+      const result = await uploadBytes(photoRef, file);
+      const url = await getDownloadURL(result.ref);
+      await updateDoc(curDoc, {
+        photo: url,
+      });
+      setCurrentPhoto(url);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const onAddFileButtonClick = () => {
+    fileInputRef?.current?.click();
   };
 
   return (
@@ -185,13 +238,39 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
         )}
       </Column>
       <Column>
-        {photo ? <Photo src={photo} /> : null}
-        {user?.uid === userId && photo ? (
-          <ImageBtnWrapper>
-            <TextButton onClick={onImageDelete} className="delete">
-              Delete Image
-            </TextButton>
-          </ImageBtnWrapper>
+        {currentPhoto ? <Photo src={currentPhoto} /> : null}
+        {user?.uid === userId ? (
+          currentPhoto ? (
+            <ImageBtnWrapper>
+              <TextButton onClick={onImageDelete} className="delete">
+                Delete Image
+              </TextButton>
+            </ImageBtnWrapper>
+          ) : (
+            <ImageBtnWrapper>
+              <IconButton onClick={onAddFileButtonClick}>
+                <svg
+                  data-slot="icon"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    clipRule="evenodd"
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.25a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z"
+                  />
+                </svg>
+              </IconButton>
+              <AttachFileInput
+                ref={fileInputRef}
+                onChange={onUploadImageFile}
+                type="file"
+                accept="image/*"
+              />
+            </ImageBtnWrapper>
+          )
         ) : null}
       </Column>
       <RightAlignedColumn>
