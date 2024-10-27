@@ -189,6 +189,9 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
   const onAddFileButtonClick = () => {
     addFileInputRef?.current?.click();
   };
+  const onChangeImage = async () => {
+    changeFileInputRef?.current?.click(); // 파일 업로드
+  };
   const onUploadImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files === null) {
@@ -223,46 +226,6 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
       setLoading(false);
     }
   };
-  const onChangeImage = async () => {
-    changeFileInputRef?.current?.click(); // 파일 업로드
-  };
-  const onChangeImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { files } = e.target;
-    if (files === null) {
-      alert("Please Selecte valid file!!");
-      return;
-    } else if (files?.length !== 1) {
-      alert("Please Selecte only one file!!");
-      return;
-    } else if (files[0].size > MAX_FILE_SIZE) {
-      alert("Please select a file less than 1MB!!");
-      return;
-    }
-
-    const file = files[0];
-    if (user?.uid !== userId || !file || isLoading) {
-      alert("Upload Failed");
-      return; // 재확인
-    }
-
-    try {
-      setLoading(true);
-
-      const photoRef = ref(storage, `tweets/${user.uid}/${id}`);
-      await deleteObject(photoRef); // 파일 삭제
-      const result = await uploadBytes(photoRef, file); // 파일 업로드
-      const url = await getDownloadURL(result.ref);
-
-      await updateDoc(curDoc, {
-        photo: url,
-      });
-      setCurrentPhoto(url);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <Wrapper>
       <Column>
@@ -287,7 +250,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
               <TextButton onClick={onChangeImage}>Change Image</TextButton>
               <AttachFileInput
                 ref={changeFileInputRef}
-                onChange={onChangeImageFile}
+                onChange={onUploadImageFile}
                 type="file"
                 accept="image/*"
               />
