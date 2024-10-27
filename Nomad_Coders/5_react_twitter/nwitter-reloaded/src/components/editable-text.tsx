@@ -2,7 +2,9 @@ import { ChangeEvent } from "react";
 import { styled } from "styled-components";
 
 interface EditableTextProps {
-  fontSize: string;
+  fontSize: number;
+  rows: number;
+  maxLength: number;
   isEditMode: boolean;
   currentText: string;
   onTextChange: (newText: string) => void;
@@ -37,6 +39,8 @@ const EditMessage = styled.textarea<{ fontSize: string }>`
 
 export default function EditableText({
   fontSize,
+  rows,
+  maxLength,
   isEditMode,
   currentText,
   onTextChange,
@@ -51,15 +55,15 @@ export default function EditableText({
     <>
       {isEditMode ? (
         <EditMessage
-          fontSize={fontSize}
-          maxLength={180}
-          rows={3}
+          fontSize={`${fontSize}px`}
+          maxLength={maxLength}
+          rows={rows}
           onChange={onEditedTextChange}
           value={currentText}
           disabled={isLoading}
         />
       ) : (
-        <Payload fontSize={fontSize}>{currentText}</Payload>
+        <Payload fontSize={`${fontSize}px`}>{currentText}</Payload>
       )}
     </>
   );

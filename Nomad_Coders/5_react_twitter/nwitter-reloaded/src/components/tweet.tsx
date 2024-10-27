@@ -187,7 +187,9 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
       <Column>
         <Username>{username}</Username>
         <EditableText
-          fontSize="18px"
+          fontSize={18}
+          rows={3}
+          maxLength={180}
           isEditMode={isEditMode}
           currentText={currentTweet}
           onTextChange={setCurrentTweet}

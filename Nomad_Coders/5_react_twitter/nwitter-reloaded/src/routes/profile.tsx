@@ -141,7 +141,9 @@ export default function Profile() {
       />
       <NameWrapper>
         <EditableText
-          fontSize={"22px"}
+          fontSize={22}
+          rows={1}
+          maxLength={40}
           isEditMode={isEditMode}
           currentText={userName}
           onTextChange={setUserName}
