@@ -99,6 +99,7 @@ const IconButton = styled.div`
 `;
 
 const TextButton = styled.button`
+  cursor: pointer;
   background-color: gray;
   color: white;
   font-weight: 600;
@@ -120,7 +121,8 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
   const [currentTweet, setCurrentTweet] = useState(tweet);
   const [currentPhoto, setCurrentPhoto] = useState(photo);
   const [isEditMode, setIsEditMode] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const addFileInputRef = useRef<HTMLInputElement | null>(null);
+  const changeFileInputRef = useRef<HTMLInputElement | null>(null);
   const user = auth.currentUser;
   const curDoc = doc(db, "tweets", id);
   const onEditMode = () => {
@@ -184,6 +186,9 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
       setLoading(false);
     }
   };
+  const onAddFileButtonClick = () => {
+    addFileInputRef?.current?.click();
+  };
   const onUploadImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files === null) {
@@ -218,10 +223,46 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
       setLoading(false);
     }
   };
-  const onAddFileButtonClick = () => {
-    fileInputRef?.current?.click();
+  const onChangeImage = async () => {
+    changeFileInputRef?.current?.click(); // 파일 업로드
   };
+  const onChangeImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { files } = e.target;
+    if (files === null) {
+      alert("Please Selecte valid file!!");
+      return;
+    } else if (files?.length !== 1) {
+      alert("Please Selecte only one file!!");
+      return;
+    } else if (files[0].size > MAX_FILE_SIZE) {
+      alert("Please select a file less than 1MB!!");
+      return;
+    }
 
+    const file = files[0];
+    if (user?.uid !== userId || !file || isLoading) {
+      alert("Upload Failed");
+      return; // 재확인
+    }
+
+    try {
+      setLoading(true);
+
+      const photoRef = ref(storage, `tweets/${user.uid}/${id}`);
+      await deleteObject(photoRef); // 파일 삭제
+      const result = await uploadBytes(photoRef, file); // 파일 업로드
+      const url = await getDownloadURL(result.ref);
+
+      await updateDoc(curDoc, {
+        photo: url,
+      });
+      setCurrentPhoto(url);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Wrapper>
       <Column>
@@ -229,6 +270,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
         {isEditMode ? (
           <EditMessage
             maxLength={180}
+            rows={3}
             onChange={onEditedTweetChange}
             value={currentTweet}
             disabled={isLoading}
@@ -242,6 +284,13 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
         {user?.uid === userId ? (
           currentPhoto ? (
             <ImageBtnWrapper>
+              <TextButton onClick={onChangeImage}>Change Image</TextButton>
+              <AttachFileInput
+                ref={changeFileInputRef}
+                onChange={onChangeImageFile}
+                type="file"
+                accept="image/*"
+              />
               <TextButton onClick={onImageDelete} className="delete">
                 Delete Image
               </TextButton>
@@ -264,7 +313,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
                 </svg>
               </IconButton>
               <AttachFileInput
-                ref={fileInputRef}
+                ref={addFileInputRef}
                 onChange={onUploadImageFile}
                 type="file"
                 accept="image/*"
